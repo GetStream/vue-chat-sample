@@ -13,6 +13,10 @@ function imageUrlForMessage(message: Message): Attachment[] {
   return message.attachments?.filter((attachment: Attachment) => attachment.type === 'image') ?? []
 }
 
+function hasImageAttachments(message: Message) {
+  return message.attachments && message.attachments?.length > 0 && message.attachments?.some(attachment => attachment.type === 'image');
+}
+
 function isOwnMessage(message: Message): boolean {
   return message.user?.id === store.userId
 }
@@ -21,6 +25,12 @@ function sendMessage() {
   if (message.value.length > 0) {
     activeChannel.value?.sendMessage({ text: message.value })
     message.value = ''
+  }
+}
+
+function handleKeyUp(e: KeyboardEvent) {
+  if (e.key === 'Enter') {
+    sendMessage()
   }
 }
 
@@ -42,7 +52,7 @@ function formatDate(date: Date | string): string {
         :key="cid"
         @click="store.setActiveChannel(channel)"
       >
-        <img :src="channel.data?.image" alt="Channel Image" />
+        <img :src="`https://getstream.io/random_png/?name=${channel.data.name ?? 'Stream'}`" alt="Channel Image" />
         <div>
           <h2>
             {{ channel.data?.name || channel.cid }}
@@ -81,14 +91,14 @@ function formatDate(date: Date | string): string {
         >
           <div class="message" :class="{ ownMessage: isOwnMessage(message as Message) }">
             <div
-              v-if="message.attachments?.length && message.attachments?.length > 0"
+              v-if="hasImageAttachments(message as Message)"
               class="messageImageContainer"
               :class="{ multipleImages: message.attachments?.length > 1 }"
             >
               <img
                 v-for="image in imageUrlForMessage(message as Message)"
-                :key="image.thumb_url"
-                :src="image.thumb_url"
+                :key="image.image_url"
+                :src="image.image_url"
                 alt=""
               />
             </div>
@@ -102,7 +112,7 @@ function formatDate(date: Date | string): string {
         </div>
       </div>
       <div class="messageComposer">
-        <input v-model="message" type="text" placeholder="Type your message" />
+        <input v-model="message" type="text" placeholder="Type your message" v-on:keyup="handleKeyUp" />
         <button :class="{ activeIcon: message.length > 0 }" @click="sendMessage()">
           <svg
             xmlns="http://www.w3.org/2000/svg"

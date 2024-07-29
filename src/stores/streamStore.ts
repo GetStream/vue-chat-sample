@@ -8,6 +8,7 @@ export const useStreamStore = defineStore('stream', () => {
 
   const apiKey = import.meta.env.VITE_APP_API_KEY
   const token = import.meta.env.VITE_APP_TOKEN
+  const userId = import.meta.env.VITE_APP_USER_ID
 
   if (apiKey === undefined) {
     throw new Error('API key is not defined')
@@ -15,9 +16,11 @@ export const useStreamStore = defineStore('stream', () => {
   if (token === undefined) {
     throw new Error('Token is not defined')
   }
+  if (userId === undefined) {
+    throw new Error('User ID is not defined');
+  }
 
   const client = StreamChat.getInstance(apiKey)
-  const userId = 'ypt3Gi62aLvgPRGVhXOx2'
 
   async function setActiveChannel(channel: Channel | undefined) {
     activeChannel.value = channel
